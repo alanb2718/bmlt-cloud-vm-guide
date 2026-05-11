@@ -120,7 +120,7 @@ You should be comfortable with:
 - Connecting to servers via SSH
 - Running commands in terminal
 - Basic file operations (ls, cd, cp, mv)
-- Text editing with nano or vi
+- Text editing with nano, vi, or emacs
 - Understanding file permissions
 
 ### Helpful But Not Required
