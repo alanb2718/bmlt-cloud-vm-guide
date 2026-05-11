@@ -5,7 +5,7 @@ This page covers the complete installation and configuration of the LAMP (Linux,
 ## Connecting to Your Server
 
 ### SSH Connection
-Connect to your server using SSH:
+Connect to your server using SSH (this assumes your username is `ubuntu` -- change as needed):
 
 ```bash
 # Using SSH key (recommended)
@@ -208,10 +208,10 @@ sudo mysql
 
 ### Create Databases and Users
 ```sql
--- Create BMLT database and user
-CREATE DATABASE bmlt;
+-- Create BMLT server database and user
+CREATE DATABASE rootserver;
 CREATE USER 'bmlt'@'localhost' IDENTIFIED BY 'your_secure_bmlt_password';
-GRANT ALL PRIVILEGES ON bmlt.* TO 'bmlt'@'localhost';
+GRANT ALL PRIVILEGES ON rootserver.* TO 'bmlt'@'localhost';
 
 -- Create YAP database and user (if planning to use YAP)
 CREATE DATABASE yap;
@@ -237,7 +237,7 @@ Verify database users can connect:
 # Test BMLT user connection
 mysql -u bmlt -p
 
-# If successful, you'll see MySQL prompt. Type EXIT; to quit
+# If successful, you'll see MySQL prompt. Type SHOW DATABASES; and verify that you can see the rootserver and yap databases.  Then type EXIT; to quit.
 ```
 
 ## Configure PHP (Optional Optimizations)

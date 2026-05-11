@@ -26,22 +26,24 @@ Before installing YAP, ensure you have:
 
 ### Get Latest YAP Release
 
+Execute the following commands, replacing 4.5.0 in the GitHub URL with the version number for the latest stable release (two occurrences). You can find the version number for the latest stable release here: https://github.com/bmlt-enabled/yap/releases/.
+
 ```bash
 # Navigate to web directory
 cd /var/www/your-domain.com
 # Or for IP setup: cd /var/www/html
 
 # Download YAP (current stable version)
-sudo wget https://github.com/bmlt-enabled/yap/releases/download/4.2.4/yap-4.2.4-php-8.0.zip -O yap-4.2.4.zip
+sudo wget https://github.com/bmlt-enabled/yap/releases/download/4.5.0/yap-4.5.0.zip
 
 # Extract the archive
-sudo unzip yap-4.2.4.zip
+sudo unzip yap-4.5.0.zip
 
 # Remove the zip file
-sudo rm yap-4.2.4.zip
+sudo rm yap-4.5.0.zip
 
 # Rename to standard directory
-sudo mv yap-4.2.4 yap
+sudo mv yap-4.5.0 yap
 
 # Set proper ownership
 sudo chown -R www-data:www-data yap
@@ -116,7 +118,7 @@ sudo chown www-data:www-data /var/www/your-domain.com/yap/config.php
 
 ### Initialize YAP Database
 
-YAP will automatically create its database tables on first use. To manually initialize:
+YAP will automatically create its database tables on first use. To verify:
 
 ```bash
 # Connect to MySQL
@@ -124,12 +126,16 @@ mysql -u yap -p
 
 # Use YAP database
 USE yap;
-
-# YAP will create tables automatically, but you can verify:
 SHOW TABLES;
 
 # Exit MySQL
 EXIT;
+```
+
+If you are migrating an existing yap server, copy the `config.php` file from that server, and use this command instead to initialize the database:
+
+```bash
+sudo mysql yap < my_yap.sql
 ```
 
 ## Twilio Configuration

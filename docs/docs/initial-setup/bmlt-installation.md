@@ -1,11 +1,10 @@
 # BMLT Installation
 
-This guide covers installing the BMLT Server on your configured LAMP stack.
+This page covers installing the BMLT Server on your configured LAMP stack.
 
-## Download BMLT Server
+## Download and Extract the BMLT Server Zip File
 
-### Get Latest Release
-Download the latest stable version from GitHub:
+Execute the following commands, replacing 4.0.2 in the GitHub URL with the version number for the latest stable release. You can find the version number for the latest stable release here: https://github.com/bmlt-enabled/bmlt-server/releases/.
 
 ```bash
 # Navigate to web directory
@@ -26,6 +25,35 @@ sudo chown -R www-data:www-data main_server
 # Set proper permissions
 sudo chmod -R 755 main_server
 ```
+
+## Download and Update the auto-config File
+
+```bash
+# Navigate to web directory
+cd /var/www/your-domain.com
+
+# Download the file initial-auto-config.txt
+sudo wget https://github.com/bmlt-enabled/bmlt-server/blob/main/installation/initial-auto-config.txt
+
+# rename it and set proper ownership and permissions
+sudo mv initial-auto-config.txt auto-config.inc.php
+sudo chown www-data:www-data auto-config.inc.php
+sudo chmod 0644 auto-config.inc.php
+```
+
+The permissions say that the owner of the file can read and write it, and the owning group and others can read it. Note that the file `auto-config.inc.php` is not inside `main_server`, but rather at the same level. This is a little weird, but does have the advantage that you can upload a new version of the server easily without touching the `auto-config.inc.php` file.  So your directory structure should look something like this:
+```
+public_html
+   auto-config.inc.php
+   main_server
+      app
+      bootstrap
+      ......
+```
+
+Now edit the `auto-config.inc.php` file using nano or another editor, updating parameter values as needed. There are two parameter values you definitely need to update, namely for `$dbUser` and `$dbPassword` (the user and password for your server database). You also need to either update the parameter value for `$gkey` if you are using Google Maps, or else delete this parameter altogether if you are using OSM (Open Street Maps) for maps and nominatim for geocoding.
+
+There are various other parameters in the file, but the default values may well be what you want.
 
 ## Configure Virtual Host (Recommended)
 
@@ -73,56 +101,7 @@ sudo apache2ctl configtest
 sudo systemctl reload apache2
 ```
 
-## Run BMLT Installation Wizard
-
-### Access Installation
-Navigate to your BMLT installation in a web browser:
-
-**With Domain:**
-```
-http://your-domain.com/main_server
-```
-
-**With IP Only:**
-```
-http://your-server-ip/main_server
-```
-
-### Installation Steps
-
-## Adding the auto-config File
-
-Download the file `initial-auto-config.txt` from github at https://raw.githubusercontent.com/bmlt-enabled/bmlt-server/refs/heads/main/installation/initial-auto-config.txt.
-
-Upload this file to your server, put it in the directory that holds your `main_server` directory, and rename it to `auto-config.inc.php`.  This file should have the permissions `-rw-r--r--` (`0644` in octal). This means that the owner of the file can read and write it, and the owning group and others can read it.
-
-Note that the file `auto-config.inc.php` is not inside `main_server`, but rather at the same level. This is a little weird, but does have the advantage that you can upload a new version of the server easily without touching the `auto-config.inc.php` file.  So your directory structure should look something like this:
-```
-public_html
-   auto-config.inc.php
-   main_server
-      app
-      bootstrap
-      ......
-```
-
-Now edit the `auto-config.inc.php` file with new parameters as needed. You can do this using the `edit` command on cPanel. There are two parameters you definitely need to update, namely `$dbUser` and `$dbPassword` (the user and password for your server database). You also need to either update the parameter `$gkey` if you are using Google Maps, or else delete this parameter altogether if you are using OSM (Open Street Maps) for maps and nominatim for geocoding.
-
-There are various other parameters in the file, but the default values may well be what you want.
-
-Alternatively, you can edit the `initial-auto-config.txt` file on your local machine, and then upload the edited file, thus avoiding needing to edit it on your web host. If you do that, be sure and use an editor intended for editing source code and not something like Microsoft Word.
-
-## Post-Installation Configuration
-
-### Remove Installation Files (Security)
-After successful installation:
-
-```bash
-# Navigate to BMLT directory
-cd /var/www/your-domain.com/main_server
-```
-
-### Set File Permissions
+## Set File Permissions
 Ensure proper security permissions:
 
 ```bash
@@ -139,49 +118,48 @@ sudo find /var/www/your-domain.com/main_server -type f -exec chmod 644 {} \;
 sudo chmod 600 /var/www/your-domain.com/auto-config.inc.php
 ```
 
-## Verify Installation
+## Setting Up the BMLT Database
 
-### Test BMLT Access
-Visit your BMLT installation:
-- **Main Interface**: `http://your-domain.com/main_server`
-- **Admin Panel**: `http://your-domain.com/main_server/admin`
+The next steps vary depending on whether you are importing an existing BMLT database or initializing a fresh one.
 
-### Check Configuration
-Verify the auto-config file was created:
+**Note:** the directions in this section assume you haven't set up SSL yet, and so the URLs start with `http`.  After you set up SSL (which is described in a later section), use `https` instead. If you are feeling cautious, after you've set up SSL, change any passwwords that were transmitted using `http`.  Or - probably better - set up SSL first before logging in to BMLT.
 
+### Importing an Existing BMLT Database
+
+Download a mysql dump of your existing database to your server.  Run the following command to import it, replacing `mydata.sql` with the name of the sql dump file on your server:
 ```bash
-# Check if config file exists
-ls -la /var/www/your-domain.com/auto-config.inc.php
-
-# View configuration (be careful not to expose passwords)
-sudo grep -v password /var/www/your-domain.com/auto-config.inc.php
+sudo mysql rootserver < mydata.sql
 ```
-
-### Test Database Connection
-Verify BMLT can connect to the database:
+Verify that the user `bmlt` can connect to the database and that it was imported correctly:
 
 ```bash
-# Check MySQL connection from BMLT user
 mysql -u bmlt -p
 
 # List tables (should show BMLT tables)
-USE bmlt;
+USE rootserver;
+SHOW TABLES;
+EXIT;
+```
+You should now be able to visit the login page for your BMLT installation and log in as usual with your current credentials at this URL: `http://your-domain.com/main_server/`. (See the note at the beginning of this section regarding SSL and `http` versus `https`.)
+
+### Initializing a Fresh BMLT Database
+
+Instead, you can start with an empty BMLT database.  The database migrations in the server code will set up the needed tables.
+
+Log in at `http://your-domain.com/main_server/` as user `serveradmin` password `change-this-password-first-thing`. As the initial password suggests (not very subtly), first go to the Account tab and change the password to something unique for your BMLT server.
+
+Verify that the user `bmlt` can connect to the database and that it was initialized correctly by the migrations:
+
+```bash
+mysql -u bmlt -p
+
+# List tables (should show BMLT tables)
+USE rootserver;
 SHOW TABLES;
 EXIT;
 ```
 
-## Basic BMLT Configuration
-
-### Access Admin Panel
-1. Navigate to: `http://your-domain.com/main_server/admin`
-2. Log in with the administrator credentials you created
-3. You'll see the BMLT administration interface
-
-### Initial Setup Tasks
-1. **Configure Service Bodies**: Add your area/region structure
-2. **Set up Meetings**: Import or add meeting data
-3. **Configure Formats**: Set up meeting formats (Open, Closed, etc.)
-4. **User Management**: Add additional administrators if needed
+At this point you can set up one or more Service Body Administrators and Service Bodies, and start adding meetings. We are now back to steps that are unchanged from the old tutorial for shared webhosting installations, so refer to that for details.
 
 ## Troubleshooting
 
@@ -297,8 +275,6 @@ With BMLT successfully installed:
 1. **Configure SSL**: [SSL Setup](ssl-setup) for HTTPS access
 2. **Install YAP**: [YAP Installation](yap-installation) if you need phone services
 3. **Set up backups**: Configure automated backups
-4. **Add meeting data**: Import your meeting information
-5. **Configure users**: Set up additional administrators
 
 ## BMLT Resources
 
