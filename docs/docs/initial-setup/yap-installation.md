@@ -26,7 +26,7 @@ Before installing YAP, ensure you have:
 
 ### Get Latest YAP Release
 
-Execute the following commands, replacing 4.5.0 in the GitHub URL with the version number for the latest stable release (two occurrences). You can find the version number for the latest stable release here: https://github.com/bmlt-enabled/yap/releases/.
+Execute the following commands, replacing 4.5.0 with the version number for the latest stable release (multiple occurrences, in particular two occurrences in the GitHub URL). You can find the version number for the latest stable release here: https://github.com/bmlt-enabled/yap/releases/.
 
 ```bash
 # Navigate to web directory
@@ -45,11 +45,14 @@ sudo rm yap-4.5.0.zip
 # Rename to standard directory
 sudo mv yap-4.5.0 yap
 
-# Set proper ownership
+# Set ownership
 sudo chown -R www-data:www-data yap
 
-# Set proper permissions
-sudo chmod -R 755 yap
+# Set directory permissions
+sudo find yap -type d -exec chmod 755 {} \;
+
+# Set file permissions
+sudo find yap -type f -exec chmod 644 {} \;
 ```
 
 ## Configure YAP

@@ -19,11 +19,14 @@ sudo unzip bmlt-server.zip
 # Remove the zip file
 sudo rm bmlt-server.zip
 
-# Set proper ownership
+# Set ownership
 sudo chown -R www-data:www-data main_server
 
-# Set proper permissions
-sudo chmod -R 755 main_server
+# Set directory permissions
+sudo find main_server -type d -exec chmod 755 {} \;
+
+# Set file permissions
+sudo find main_server -type f -exec chmod 644 {} \;
 ```
 
 ## Download and Update the auto-config File
@@ -99,23 +102,6 @@ sudo apache2ctl configtest
 
 # Reload Apache
 sudo systemctl reload apache2
-```
-
-## Set File Permissions
-Ensure proper security permissions:
-
-```bash
-# Set ownership
-sudo chown -R www-data:www-data /var/www/your-domain.com/main_server
-
-# Set directory permissions
-sudo find /var/www/your-domain.com/main_server -type d -exec chmod 755 {} \;
-
-# Set file permissions
-sudo find /var/www/your-domain.com/main_server -type f -exec chmod 644 {} \;
-
-# Secure configuration file
-sudo chmod 600 /var/www/your-domain.com/auto-config.inc.php
 ```
 
 ## Setting Up the BMLT Database
@@ -224,7 +210,7 @@ sudo systemctl restart apache2
 ### Hide PHP Version
 Edit PHP configuration:
 ```bash
-sudo nano /etc/php/8.1/apache2/php.ini
+sudo nano /etc/php/8.3/apache2/php.ini
 ```
 
 Set:
